@@ -371,34 +371,35 @@
   <script src="./oneko.js"></script>
 
   <script>
-(function () {
-    const NAMESPACE = "mig-25pd-site";   // change if you want
-    const KEY = "about-page";
-    const LOCAL_KEY = "mig_about_viewed";
+  (async () => {
+      const STORAGE_KEY = "mig_about_viewed";
+      const counterEl = document.getElementById("viewCounter");
 
-    const counterEl = document.getElementById("viewCounter");
-    if (!counterEl) return;
+      if (!counterEl) return;
 
-    const hasViewed = localStorage.getItem(LOCAL_KEY);
+      // Change this URL to your counter's endpoint
+      const baseUrl = "https://api.counterapi.dev/v2/about-page";
 
-    const url = hasViewed
-        ? `https://api.countapi.xyz/get/${NAMESPACE}/${KEY}`
-        : `https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`;
+      try {
+          let url;
 
-    if (!hasViewed) {
-        localStorage.setItem(LOCAL_KEY, "true");
-    }
+          if (!localStorage.getItem(STORAGE_KEY)) {
+              url = baseUrl + "/up"; // increment
+              localStorage.setItem(STORAGE_KEY, "true");
+          } else {
+              url = baseUrl; // read only
+          }
 
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            counterEl.textContent = "Views: " + data.value;
-        })
-        .catch(() => {
-            counterEl.textContent = "Views: unavailable";
-        });
-})();
-</script>
+          const res = await fetch(url);
+          const data = await res.json();
+
+          counterEl.textContent = "Views: " + data.value;
+      } catch (err) {
+          counterEl.textContent = "Views: unavailable";
+          console.error(err);
+      }
+  })();
+  </script>
 
   
 </body>
